@@ -4,9 +4,11 @@ from array import array
 from typing import cast, List, Tuple, Union, Optional, Iterator, Final, TypeVar
 
 
-class NoSuchSpeciesException(Exception):
+class NoSuchSpeciesError(Exception):
     pass
 
+class IllegalMoveError(Exception):
+    pass
 
 Point = Tuple[int, int]
 X: Final = 0
@@ -112,8 +114,6 @@ def square(r: int = 1, centre: Point = (0, 0)) -> Iterator[Point]:
 
 
 class Board:
-    class IllegalMoveError(Exception):
-        pass
 
     def __init__(
         self,
@@ -247,7 +247,7 @@ class Board:
             self[new] = self[old]
             self[old] = -1
         else:
-            raise self.IllegalMoveError
+            raise IllegalMoveError
 
     # Returns the proportion of neighbours which are conspecific to the agent at
     # `xy`
@@ -297,7 +297,7 @@ class Board:
                 try:
                     self.move(xy, candidate_spot)
                     return candidate_spot
-                except self.IllegalMoveError:
+                except IllegalMoveError:
                     continue
 
             return xy

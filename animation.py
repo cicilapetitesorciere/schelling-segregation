@@ -16,7 +16,7 @@ def colourmap(species: int) -> Colour:
     elif species == 2:
         return (45, 45, 181)
     else:
-        raise NoSuchSpeciesException()
+        raise NoSuchSpeciesError()
 
 
 def animate_schelling(
