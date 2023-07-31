@@ -3,6 +3,11 @@ from random import shuffle, random
 from array import array
 from typing import cast, List, Tuple, Union, Optional, Iterator, Final, TypeVar
 
+
+class NoSuchSpeciesException(Exception):
+    pass
+
+
 Point = Tuple[int, int]
 X: Final = 0
 Y: Final = 1
@@ -186,7 +191,9 @@ class Board:
             * area_of_board,
         )
 
-        self.log: Optional[List[List[Tuple[Tuple]]]] = [] if record_moves else None
+        self.log: Optional[List[List[Tuple[Point, Point]]]] = (
+            [] if record_moves else None
+        )
 
         # We will track which squares are vacant so that we can efficiently find
         # spots to place all of our agentsmoves: Iterator[Tuple[Point, Point]] = iter(())
