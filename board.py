@@ -124,6 +124,10 @@ class Board:
         k: Optional[int] = None,
         record_moves: bool = False,
     ) -> None:
+        
+        # If `q` is an integer, then this function returns True iff `q` is greater
+        # than or equal to 0. If `q` is a tuple, then this function returns True iff
+        # each element of `q` is greater than or equal to zero
         def allgte0(q: Union[int, Tuple[int, ...]]) -> bool:
             return (min(q) if isinstance(q, tuple) else q) >= 0
 
@@ -283,6 +287,27 @@ class Board:
 
     # Runs one full round of the simulation
     def update(self):
+
+        # Finds a suitable point for the agent at `xy` to move to and moves the
+        # agent to that location and produces that point as a return-value.
+        #
+        # Schelling allows for a variety of algorithms to achieve this. In this
+        # this particular case we use the following algorithm:
+        #
+        # The agent first chooses a search space. This search space will include
+        # at least the spaces immediately surrounding the agent (including 
+        # corners). The agent then has the option to expand their search space
+        # outwards by one unit. If they do choose to expand the search space, they
+        # are given the option to expand it again. This outward expansion may
+        # theoretically continue forever. At each iteratetion, the probability
+        # that the agent chooses to expand the search space is 1-`proximity_bias`.
+        #
+        # Once the search space is chosen, the agent will randomly choose a point
+        # from it to try to move to. If the piece is unable to succesfully make
+        # the move (i.e. it would move the piece off the board or if another agent
+        # is already occupying the chosen space) the agent will discard their
+        # first choice and choose another. If their are no open spots in the
+        # agent's search space, it will stay put.
         def find_and_move_to_new_spot(xy: Point) -> Point:
             r = 1
             searchspace: List[Point] = list(square(r=r, centre=xy))
