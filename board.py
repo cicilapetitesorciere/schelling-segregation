@@ -117,6 +117,7 @@ class Board:
         thresholds: Union[int, Tuple[int, ...]],
         proximity_bias: Union[float, Tuple[float, ...]] = 0.75,
         k: Optional[int] = None,
+        record_moves: bool = False,
     ) -> None:
         def allgte0(q: Union[int, Tuple[int, ...]]) -> bool:
             return (min(q) if isinstance(q, tuple) else q) >= 0
@@ -184,6 +185,8 @@ class Board:
             ]
             * area_of_board,
         )
+
+        self.log: Optional[List[List[Tuple[Tuple]]]] = [] if record_moves else None
 
         # We will track which squares are vacant so that we can efficiently find
         # spots to place all of our agentsmoves: Iterator[Tuple[Point, Point]] = iter(())
@@ -273,7 +276,7 @@ class Board:
 
     # Runs one full round of the simulation
     def update(self):
-        def find_new_spot(xy: Point):
+        def find_and_move_to_new_spot(xy: Point) -> Point:
             r = 1
             searchspace: List[Point] = list(square(r=r, centre=xy))
             while random() >= self.proximity_bias[self[xy]]:
@@ -286,11 +289,15 @@ class Board:
                 candidate_spot: Point = searchspace.pop(0)
                 try:
                     self.move(xy, candidate_spot)
-                    return
+                    return candidate_spot
                 except self.IllegalMoveError:
                     continue
 
-        dissatisfied_agents = []
+            return xy
+
+        dissatisfied_agents: List[Point] = list()
+        moves_this_round: List[Tuple[Point, Point]] = list()
+
         for i in range(self.shape[X]):
             for j in range(self.shape[Y]):
                 if self[(i, j)] != -1 and (not self.is_satisfied((i, j))):
@@ -298,5 +305,10 @@ class Board:
 
         shuffle(dissatisfied_agents)
 
-        for agent in dissatisfied_agents:
-            find_new_spot(agent)
+        for agent_location in dissatisfied_agents:
+            destination = find_and_move_to_new_spot(agent_location)
+            if (agent_location != destination) and (self.log != None):
+                moves_this_round.append((agent_location, destination))
+
+        if isinstance(self.log, list):
+            self.log.append(moves_this_round)
