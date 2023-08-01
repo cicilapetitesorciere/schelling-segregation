@@ -1,14 +1,16 @@
 import itertools
 from random import shuffle, random
 from array import array
-from typing import cast, List, Tuple, Union, Optional, Iterator, Final, TypeVar
+from typing import cast, List, Tuple, Iterator, Final, TypeVar
 
 
 class NoSuchSpeciesError(Exception):
     pass
 
+
 class IllegalMoveError(Exception):
     pass
+
 
 Point = Tuple[int, int]
 X: Final = 0
@@ -114,21 +116,20 @@ def square(r: int = 1, centre: Point = (0, 0)) -> Iterator[Point]:
 
 
 class Board:
-
     def __init__(
         self,
         shape: Tuple[int, int],
-        n: Union[int, Tuple[int, ...]],
-        thresholds: Union[int, Tuple[int, ...]],
-        proximity_bias: Union[float, Tuple[float, ...]] = 0.75,
-        k: Optional[int] = None,
+        n: int | Tuple[int, ...],
+        thresholds: int | Tuple[int, ...],
+        proximity_bias: float | Tuple[float, ...] = 0.75,
+        k: int | None = None,
         record_moves: bool = False,
     ) -> None:
-        
+
         # If `q` is an integer, then this function returns True iff `q` is greater
         # than or equal to 0. If `q` is a tuple, then this function returns True iff
         # each element of `q` is greater than or equal to zero
-        def allgte0(q: Union[int, Tuple[int, ...]]) -> bool:
+        def allgte0(q: int | Tuple[int, ...]) -> bool:
             return (min(q) if isinstance(q, tuple) else q) >= 0
 
         assert shape[X] > 0 and shape[Y] > 0
@@ -195,9 +196,7 @@ class Board:
             * area_of_board,
         )
 
-        self.log: Optional[List[List[Tuple[Point, Point]]]] = (
-            [] if record_moves else None
-        )
+        self.log: List[List[Tuple[Point, Point]]] | None = [] if record_moves else None
 
         # We will track which squares are vacant so that we can efficiently find
         # spots to place all of our agentsmoves: Iterator[Tuple[Point, Point]] = iter(())
@@ -295,7 +294,7 @@ class Board:
         # this particular case we use the following algorithm:
         #
         # The agent first chooses a search space. This search space will include
-        # at least the spaces immediately surrounding the agent (including 
+        # at least the spaces immediately surrounding the agent (including
         # corners). The agent then has the option to expand their search space
         # outwards by one unit. If they do choose to expand the search space, they
         # are given the option to expand it again. This outward expansion may
