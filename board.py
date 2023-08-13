@@ -181,9 +181,7 @@ class Board:
 
         # We will track which squares are vacant so that we can efficiently find
         # spots to place all of our agentsmoves: Iterator[Tuple[Point, Point]] = iter(())
-        vacant_squares: List[Point] = list(
-            itertools.product(range(shape[X]), range(shape[Y]))
-        )
+        vacant_squares: List[Point] = list(self.all_spaces())
 
         shuffle(vacant_squares)
 
@@ -191,12 +189,6 @@ class Board:
         for species in range(k):
             for _ in range(self.populations[species]):
                 self[vacant_squares.pop(0)] = species
-
-    def includes_point(self, xy: Point) -> bool:
-        """
-        Returns True iff `xy` is a valid point on the board
-        """
-        return (0 <= xy[X] < self.shape[X]) and (0 <= xy[Y] < self.shape[Y])
 
     def __getitem__(self, xy: Point) -> int:
         if self.includes_point(xy):
@@ -221,6 +213,15 @@ class Board:
                 ret += " "
             ret += "\n"
         return ret
+
+    def all_spaces(self) -> Iterator[Point]:
+        return itertools.product(range(self.shape[X]), range(self.shape[Y]))
+
+    def includes_point(self, xy: Point) -> bool:
+        """
+        Returns True iff `xy` is a valid point on the board
+        """
+        return (0 <= xy[X] < self.shape[X]) and (0 <= xy[Y] < self.shape[Y])
 
     def move(self, start: Point, end: Point) -> None:
         """
