@@ -244,7 +244,7 @@ class Board:
         number_of_neighbours: int = 0
         number_of_similar_neighbours: int = 0
         assert self[xy] >= 0
-        for neighbour in neighbourhood(centre=xy, r=pseudoradius):
+        for neighbour in neighbourhood(centre=xy, pseudoradius=pseudoradius):
             try:
                 if self[neighbour] != -1:
                     number_of_neighbours += 1
@@ -275,7 +275,7 @@ class Board:
                     ret += 1
         return ret
 
-    def update(self):
+    def update(self) -> None:
         """
         Runs one full round of the simulation
         """
