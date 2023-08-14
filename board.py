@@ -7,15 +7,15 @@ from typing import cast, List, Tuple, Iterator, Final, TypeVar
 class NoSuchSpeciesError(Exception):
     pass
 
-
 class IllegalMoveError(Exception):
     pass
 
+class EmptySpaceError(Exception):
+    pass
 
 Point = Tuple[int, int]
 X: Final = 0
 Y: Final = 1
-
 
 def neighbourhood(pseudoradius: int = 1, centre: Point = (0, 0)) -> Iterator[Point]:
     """
@@ -94,7 +94,6 @@ def neighbourhood(pseudoradius: int = 1, centre: Point = (0, 0)) -> Iterator[Poi
             for offset in range(-pseudoradius, pseudoradius):
                 ret[axis] = centre[axis] + direction * offset
                 yield cast(Point, tuple(ret))
-
 
 class Board:
 
@@ -227,37 +226,36 @@ class Board:
         """
         Moves the agent located at `start` to `end`
         """
-        if (
-            self.includes_point(start)
-            and self.includes_point(end)
-            and self[start] != -1
-            and self[end] == -1
-        ):
+        if self[start] == -1:
+            raise EmptySpaceError
+        elif self[end] != -1:
+            raise IllegalMoveError
+        else:
             self[end] = self[start]
             self[start] = -1
-        else:
-            raise IllegalMoveError
 
     def conspecificity(self, xy: Point, pseudoradius: int = 1) -> float:
         """
         Returns the proportion of neighbours which are conspecific to the agent located at `xy`
         """
-        number_of_neighbours: int = 0
-        number_of_similar_neighbours: int = 0
-        assert self[xy] >= 0
-        for neighbour in neighbourhood(centre=xy, pseudoradius=pseudoradius):
-            try:
-                if self[neighbour] != -1:
-                    number_of_neighbours += 1
-                    if self[neighbour] == self[xy]:
-                        number_of_similar_neighbours += 1
-            except IndexError:
-                pass
+        if self[xy] < 0:
+            raise EmptySpaceError
+        else:
+            number_of_neighbours: int = 0
+            number_of_similar_neighbours: int = 0
+            for neighbour in neighbourhood(centre=xy, pseudoradius=pseudoradius):
+                try:
+                    if self[neighbour] != -1:
+                        number_of_neighbours += 1
+                        if self[neighbour] == self[xy]:
+                            number_of_similar_neighbours += 1
+                except IndexError:
+                    pass
 
-        try:
-            return number_of_similar_neighbours / number_of_neighbours
-        except ZeroDivisionError:
-            return 0.0
+            try:
+                return number_of_similar_neighbours / number_of_neighbours
+            except ZeroDivisionError:
+                return 0.0
 
     def is_satisfied(self, xy: Point) -> bool:
         """
@@ -304,9 +302,8 @@ class Board:
                 try:
                     self.move(xy, candidate_spot)
                     return candidate_spot
-                except IllegalMoveError:
+                except (IllegalMoveError, EmptySpaceError, IndexError):
                     continue
-
             return xy
 
         dissatisfied_agents: List[Point] = list()

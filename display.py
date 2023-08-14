@@ -105,7 +105,7 @@ def animate_schelling(
     delay: float,
     number_of_species: int,
     thresholds: int | Tuple[int, ...],
-    proximity_bias: float | Tuple[float, ...],
+    proximity_bias: float | Tuple[float, ...] = 0.75,
     border_colour: Colour | None = None,
     display_conspecificity: bool = False,
     record_moves: bool = False,
