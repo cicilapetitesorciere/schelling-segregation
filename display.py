@@ -4,6 +4,7 @@ from PIL import Image, ImageDraw
 from IPython.display import display, clear_output
 import time
 from typing import Tuple, List, Final
+from helpers import percentage
 
 
 class CantColourSpeciesError(Exception):
@@ -94,16 +95,18 @@ def draw_board(
         except IndexError:
             pass
 
-    # We finally print a little message on the top-right showing the percentage of satisfied agents
-    total_satisfied: int = board.get_total_satisfied()
+    # We finally print a little message on the top-right showing the percentage of satisfied agents and the mean conspecificity
     drawing.text(
         (10, 0),
         "Satisfied: "
         + (
             "everyone"
-            if total_satisfied == board.get_total_population()
-            else str(round(100 * total_satisfied / board.get_total_population())) + "%"
+            if board.get_total_satisfied() == board.get_total_population()
+            else percentage(board.get_proportion_satisfied())
         ),
+    )
+    drawing.text(
+        (10, 10), f"Mean Conspecificity: {percentage(board.mean_conspecificity())}"
     )
 
     # Congradulations! We're done :)

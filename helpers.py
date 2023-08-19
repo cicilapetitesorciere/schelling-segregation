@@ -34,3 +34,10 @@ def interleave(a: Iterable[A], b: Iterable[B]) -> Iterator[A | B]:
                     yield next(iter1)
             except StopIteration:
                 return
+
+
+def percentage(p: float) -> str:
+    """
+    Displays p as a whole-number percentage
+    """
+    return f"{round(100 * p)}%"

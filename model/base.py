@@ -264,13 +264,25 @@ class Board:
             except ZeroDivisionError:
                 return 0
 
+    def mean_conspecificity(self) -> float:
+        total_conspecificity: float = 0
+        total_counted: int = 0
+        for xy in self.get_all_cells():
+            try:
+                total_conspecificity += self.conspecificity(xy)
+                total_counted += 1
+            except EmptySpaceError:
+                continue
+        assert total_counted == self.get_total_population()
+        return total_conspecificity / total_counted
+
     def is_satisfied(self, xy: Coordinate) -> bool:
         """
         Returns `True` iff the agent located at `xy` is satisfied
         """
         species: Species = self[xy]
         if isinstance(species, int):
-            return self.conspecificity(xy) >= self._THRESHOLDS[species]
+            return self.conspecificity(xy) > self._THRESHOLDS[species]
         else:
             raise EmptySpaceError(xy)
 
@@ -299,4 +311,3 @@ class Board:
         Runs one full round of the simulation. Note this function mutates the board
         """
         pass
-    

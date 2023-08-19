@@ -106,7 +106,10 @@ class Board1D(Board):
                 current_spot = new_spot
 
                 # Is it satisfied? If so then we're done. Otherwise, we try the next spot
-                if self.is_satisfied((current_spot, 0)):
+                try:
+                    if self.is_satisfied((current_spot, 0)):
+                        break
+                except EmptySpaceError:
                     break
 
             self.log.append([((x, 0), (current_spot, 0))])
