@@ -166,24 +166,23 @@ def animate_schelling(
         except KeyboardInterrupt:
             break
 
-        finally:
 
-            # Now that everything is finished we first print out the beginning and end for comparison
-            clear_output(wait=True)
-            print("How it started:")
-            display(history[0])
-            print()
-            print("How it's going:")
-            display(history[-1])
+    # Now that everything is finished we first print out the beginning and end for comparison
+    clear_output(wait=True)
+    print("How it started:")
+    display(history[0])
+    print()
+    print("How it's going:")
+    display(history[-1])
 
-            # And if some outfile was specified, we make a little gif
-            if isinstance(outfile_name, str):
-                print(f'Saving file as "{outfile_name}"...')
-                history[0].save(
-                    outfile_name,
-                    append_images=history[1:],
-                    save_all=True,
-                    optimize=False,
-                    duration=1 if delay == 0 else 1000 * delay,
-                    loop=0,
-                )
+    # And if some outfile was specified, we make a little gif
+    if isinstance(outfile_name, str):
+        print(f'Saving file as "{outfile_name}"...')
+        history[0].save(
+            outfile_name,
+            append_images=history[1:],
+            save_all=True,
+            optimize=False,
+            duration=1 if delay == 0 else 1000 * delay,
+            loop=0,
+        )
