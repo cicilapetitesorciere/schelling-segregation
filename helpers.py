@@ -1,13 +1,14 @@
 from typing import Callable, TypeVar, Iterable, Iterator, List
 
-A = TypeVar('A')
-B = TypeVar('B')
+A = TypeVar("A")
+B = TypeVar("B")
 
 # def count(pred: Callable[[A], bool], iter: Iterable[A]):
 #     """
 #     Counts the number of elements of `iter` which satisfy `pred`
 #     """
 #     return sum(map(pred, iter))
+
 
 def interleave(a: Iterable[A], b: Iterable[B]) -> Iterator[A | B]:
     """

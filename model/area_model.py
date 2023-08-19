@@ -3,7 +3,10 @@ from array import array
 from typing import Iterable, cast, List, Tuple, Iterator, Final
 from model.base import *
 
-def neighbourhood(centre: Coordinate = (0, 0), pseudoradius: int = 1) -> Iterator[Coordinate]:
+
+def neighbourhood(
+    centre: Coordinate = (0, 0), pseudoradius: int = 1
+) -> Iterator[Coordinate]:
     """
     Generates the points which draw a square entred at `centre` such that each of the four walls is offset `pseudoradius` units away from the centre
 
@@ -18,7 +21,7 @@ def neighbourhood(centre: Coordinate = (0, 0), pseudoradius: int = 1) -> Iterato
     x c x
     x x x
     ```
-    
+
     and `pseudoradius=2` with `centre=(0,0)` produces:
 
     `(2, 2), (1, 2), (0, 2), (-1, 2), (-2, -2), (-1, -2), (0, -2), (1, -2), (-2, 2), (-2, 1), (-2, 0), (-2, -1), (2, -2), (2, -1), (2, 0), (2, 1)`
@@ -42,7 +45,7 @@ def neighbourhood(centre: Coordinate = (0, 0), pseudoradius: int = 1) -> Iterato
     | 3 1 1 1 1
         <------
     ```
-        
+
     Notice that this ordering corresponds to the order of the points listed for `pseudoradius=2`. It is also analagous to the points listed for `pseudoradius=1`.
 
     The algorithm is easiest to explain if we start by assuming `centre=(0,0)`
@@ -52,11 +55,11 @@ def neighbourhood(centre: Coordinate = (0, 0), pseudoradius: int = 1) -> Iterato
     The four walls run respectively along the following lines:
 
     1: `y = +pseudoradius` (travels toward negative x)
-    
+
     2: `y = -pseudoradius` (travels toward positve x)
-    
+
     3: `x = -pseudoradius` (travels toward negative y)
-    
+
     4: `x = +pseudoradius` (travels toward positive y)
 
     It's easy to exhaustively check that the RHS generalizes to `pseudoradius*direction*(2*axis-1)` where `axis=0` indicates the x-axis, and `axis=1` represents the y-axis
@@ -67,12 +70,12 @@ def neighbourhood(centre: Coordinate = (0, 0), pseudoradius: int = 1) -> Iterato
 
     Generalizing the function to other centres is then just a case of adding pair-wisethe elements of the new centre to the zero-centred output points
     """
-    
+
     if pseudoradius < 1:
-        raise ValueError('Pseudoradius must be a strictly positive integer')
+        raise ValueError("Pseudoradius must be a strictly positive integer")
 
     # Chooses wall
-    for axis in [0, 1]: # Zero is the x-axis and 1 is the y-axis
+    for axis in [0, 1]:  # Zero is the x-axis and 1 is the y-axis
         for direction in [-1, +1]:
             # Generates wall
             ret: List[int] = [0, 0]
@@ -82,33 +85,30 @@ def neighbourhood(centre: Coordinate = (0, 0), pseudoradius: int = 1) -> Iterato
                 ret[axis] = centre[axis] + direction * offset
                 yield cast(Coordinate, tuple(ret))
 
-class Board2D(Board):
 
-    def __init__(
-        self,
-        width: int,
-        height: int,
-        neighbourhood_size: int = 1,
-        **kwargs
-    ):
-        
+class Board2D(Board):
+    def __init__(self, width: int, height: int, neighbourhood_size: int = 1, **kwargs):
+
         super().__init__(width, height, kwargs)
 
         if neighbourhood_size <= 0:
-            raise ValueError('neighbourhood_size must be strictly positive')
+            raise ValueError("neighbourhood_size must be strictly positive")
         else:
-            self._NEIGHBOURHOOD_SIZE:   Final[int] = neighbourhood_size
+            self._NEIGHBOURHOOD_SIZE: Final[int] = neighbourhood_size
 
         try:
-            self._PROXIMITY_BIASES = (kwargs['proximity_bias'], ) * self.get_number_of_species()
-            if 'proximity_biases' in kwargs:
-                raise OverdeterminationError(subject = 'proximity biases')
+            self._PROXIMITY_BIASES = (
+                kwargs["proximity_bias"],
+            ) * self.get_number_of_species()
+            if "proximity_biases" in kwargs:
+                raise OverdeterminationError(subject="proximity biases")
         except KeyError:
-            try: 
-                self._PROXIMITY_BIASES = kwargs['proximity_biases']
+            try:
+                self._PROXIMITY_BIASES = kwargs["proximity_biases"]
             except KeyError:
-                self._PROXIMITY_BIASES = (0.75, )* self.get_number_of_species() # Default value
-    
+                self._PROXIMITY_BIASES = (
+                    0.75,
+                ) * self.get_number_of_species()  # Default value
 
         # We then create a structure to store all of the data, intializing all
         # squares to -1, which will be converted to `None` when using `__getitem__()`
@@ -125,41 +125,41 @@ class Board2D(Board):
         vacant_cells: List[Coordinate] = list(self.get_all_cells())
 
         shuffle(vacant_cells)
-        
+
         for species in range(self.get_number_of_species()):
             for _ in range(self.get_population(species)):
                 self[vacant_cells.pop(0)] = species
 
-
     def __getitem__(self, xy: Coordinate) -> Species:
         if self.includes(xy):
             (x, y) = xy
-            pre: int =  self._data[y * self._WIDTH + x]
+            pre: int = self._data[y * self._WIDTH + x]
             if pre >= 0:
                 return pre
             else:
                 return None
         else:
             raise OutOfBoundsError()
-        
+
     def __setitem__(self, xy: Coordinate, newvalue: Species) -> None:
-        
+
         (x, y) = xy
+
         def setnewvalue(nv: int) -> None:
-             self._data[y * self.get_width() + x] = -1 if newvalue is None else newvalue
+            self._data[y * self.get_width() + x] = -1 if newvalue is None else newvalue
 
         if not self.includes(xy):
-            raise OutOfBoundsError(xy)
-        elif newvalue == None:
+            raise OutOfBoundsError()
+        elif not isinstance(newvalue, int):
             setnewvalue(-1)
         elif newvalue >= 0:
             setnewvalue(newvalue)
         else:
-            raise ValueError('newvalue must be a valid species (i.e. non-negative)')
-        
+            raise ValueError("newvalue must be a valid species (i.e. non-negative)")
+
     def get_width(self) -> int:
         return self._WIDTH
-    
+
     def get_height(self) -> int:
         return self._HEIGHT
 
@@ -169,8 +169,8 @@ class Board2D(Board):
                 if self.includes(neighbour):
                     yield neighbour
         else:
-            raise OutOfBoundsError(xy)
-        
+            raise OutOfBoundsError
+
     def update(self) -> None:
         """
         Runs one full round of the simulation
@@ -181,7 +181,7 @@ class Board2D(Board):
             Moves the agent located at `start` to `end`
             """
             if self[start] == None:
-                raise EmptySpaceError
+                raise EmptySpaceError(start)
             elif self[end] != None:
                 raise IllegalMoveError(start, end)
             else:
@@ -198,11 +198,17 @@ class Board2D(Board):
 
             Once the search space is chosen, the agent will randomly choose a point from it to try to move to. If the piece is unable to succesfully make the move (i.e. it would move the piece off the board or if another agent is already occupying the chosen space) the agent will discard their first choice and choose another. If their are no open spots in the agent's search space, it will stay put.
             """
-            r = 1
-            searchspace: List[Coordinate] = list(neighbourhood(pseudoradius=r, centre=xy))
-            while random() >= self._PROXIMITY_BIASES[self[xy]]:
-                r += 1
+
+            species: Species = self[xy]
+
+            if not isinstance(species, int):
+                raise EmptySpaceError(xy)
+
+            searchspace = list()
+            for r in itertools.count(start=1):
                 searchspace += list(neighbourhood(pseudoradius=r, centre=xy))
+                if random() < self._PROXIMITY_BIASES[species]:
+                    break
 
             shuffle(searchspace)
 
